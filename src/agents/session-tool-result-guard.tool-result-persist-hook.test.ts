@@ -8,6 +8,8 @@ import { describe, expect, it, afterEach } from "vitest";
 
 import { loadClawdbotPlugins } from "../plugins/loader.js";
 import { resetGlobalHookRunner } from "../plugins/hook-runner-global.js";
+import { setActivePluginRegistry } from "../plugins/runtime.js";
+import { createTestRegistry } from "../test-utils/channel-plugins.js";
 import { guardSessionManager } from "./session-tool-result-guard-wrapper.js";
 
 const EMPTY_CONFIG_SCHEMA = `configSchema: {
@@ -22,7 +24,15 @@ function writeTempPlugin(params: { dir: string; id: string; body: string }): str
   return file;
 }
 
+const ORIGINAL_BUNDLED_PLUGINS_DIR = process.env.CLAWDBOT_BUNDLED_PLUGINS_DIR;
+
 afterEach(() => {
+  if (ORIGINAL_BUNDLED_PLUGINS_DIR === undefined) {
+    delete process.env.CLAWDBOT_BUNDLED_PLUGINS_DIR;
+  } else {
+    process.env.CLAWDBOT_BUNDLED_PLUGINS_DIR = ORIGINAL_BUNDLED_PLUGINS_DIR;
+  }
+  setActivePluginRegistry(createTestRegistry([]));
   resetGlobalHookRunner();
 });
 

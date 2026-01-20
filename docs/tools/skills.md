@@ -88,6 +88,8 @@ Notes:
 
     The tool is invoked with params:
     `{ command: "<raw args>", commandName: "<slash command>", skillName: "<skill name>" }`.
+    Tool-dispatch commands still respect tool policies/sandbox rules (same as normal model tools).
+    Replies are derived from tool results; include `MEDIA:` tokens or media URLs in tool output to send attachments.
 
 ## Gating (load-time filters)
 
