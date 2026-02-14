@@ -143,6 +143,10 @@ export const FIELD_HELP: Record<string, string> = {
   "agents.defaults.envelopeTimestamp":
     'Include absolute timestamps in message envelopes ("on" or "off").',
   "agents.defaults.envelopeElapsed": 'Include elapsed time in message envelopes ("on" or "off").',
+  "agents.defaults.heartbeat.emptyFilePolicy":
+    'Behavior when HEARTBEAT.md has only comments/headers: "skip" to preserve legacy behavior or "run" to keep heartbeat running.',
+  "agents.list[].heartbeat.emptyFilePolicy":
+    'Per-agent override for empty HEARTBEAT.md behavior ("skip" or "run").',
   "agents.defaults.models": "Configured model catalog (keys are full provider/model IDs).",
   "agents.defaults.memorySearch":
     "Vector search over MEMORY.md and memory/*.md (per-agent overrides supported).",

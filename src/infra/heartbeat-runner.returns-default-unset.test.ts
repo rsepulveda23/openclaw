@@ -948,7 +948,7 @@ describe("runHeartbeatOnce", () => {
     }
   });
 
-  it("skips heartbeat when HEARTBEAT.md is effectively empty (saves API calls)", async () => {
+  it("runs heartbeat when HEARTBEAT.md is effectively empty", async () => {
     const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-hb-"));
     const storePath = path.join(tmpDir, "sessions.json");
     const workspaceDir = path.join(tmpDir, "workspace");
@@ -991,6 +991,7 @@ describe("runHeartbeatOnce", () => {
         ),
       );
 
+      replySpy.mockResolvedValue({ text: "heartbeat ran" });
       const sendWhatsApp = vi.fn().mockResolvedValue({
         messageId: "m1",
         toJid: "jid",
@@ -1007,7 +1008,72 @@ describe("runHeartbeatOnce", () => {
         },
       });
 
-      // Should skip without making API call
+      expect(res.status).toBe("ran");
+      expect(replySpy).toHaveBeenCalled();
+      expect(sendWhatsApp).toHaveBeenCalledTimes(1);
+    } finally {
+      replySpy.mockRestore();
+      await fs.rm(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it("skips heartbeat when HEARTBEAT.md is effectively empty and emptyFilePolicy=skip", async () => {
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-hb-"));
+    const storePath = path.join(tmpDir, "sessions.json");
+    const workspaceDir = path.join(tmpDir, "workspace");
+    const replySpy = vi.spyOn(replyModule, "getReplyFromConfig");
+    try {
+      await fs.mkdir(workspaceDir, { recursive: true });
+      await fs.writeFile(
+        path.join(workspaceDir, "HEARTBEAT.md"),
+        "# HEARTBEAT.md\n\n## Tasks\n\n",
+        "utf-8",
+      );
+
+      const cfg: OpenClawConfig = {
+        agents: {
+          defaults: {
+            workspace: workspaceDir,
+            heartbeat: { every: "5m", target: "whatsapp", emptyFilePolicy: "skip" },
+          },
+        },
+        channels: { whatsapp: { allowFrom: ["*"] } },
+        session: { store: storePath },
+      };
+      const sessionKey = resolveMainSessionKey(cfg);
+
+      await fs.writeFile(
+        storePath,
+        JSON.stringify(
+          {
+            [sessionKey]: {
+              sessionId: "sid",
+              updatedAt: Date.now(),
+              lastChannel: "whatsapp",
+              lastTo: "+1555",
+            },
+          },
+          null,
+          2,
+        ),
+      );
+
+      const sendWhatsApp = vi.fn().mockResolvedValue({
+        messageId: "m1",
+        toJid: "jid",
+      });
+
+      const res = await runHeartbeatOnce({
+        cfg,
+        deps: {
+          sendWhatsApp,
+          getQueueSize: () => 0,
+          nowMs: () => 0,
+          webAuthExists: async () => true,
+          hasActiveWebListener: () => true,
+        },
+      });
+
       expect(res.status).toBe("skipped");
       if (res.status === "skipped") {
         expect(res.reason).toBe("empty-heartbeat-file");
@@ -1020,7 +1086,7 @@ describe("runHeartbeatOnce", () => {
     }
   });
 
-  it("does not skip wake-triggered heartbeat when HEARTBEAT.md is effectively empty", async () => {
+  it("runs wake-triggered heartbeat when HEARTBEAT.md is effectively empty", async () => {
     const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-hb-"));
     const storePath = path.join(tmpDir, "sessions.json");
     const workspaceDir = path.join(tmpDir, "workspace");
@@ -1088,7 +1154,7 @@ describe("runHeartbeatOnce", () => {
     }
   });
 
-  it("does not skip hook-triggered heartbeat when HEARTBEAT.md is effectively empty", async () => {
+  it("runs hook-triggered heartbeat when HEARTBEAT.md is effectively empty", async () => {
     const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-hb-"));
     const storePath = path.join(tmpDir, "sessions.json");
     const workspaceDir = path.join(tmpDir, "workspace");

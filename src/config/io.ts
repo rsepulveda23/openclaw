@@ -19,6 +19,7 @@ import {
   applyCompactionDefaults,
   applyContextPruningDefaults,
   applyAgentDefaults,
+  applyHeartbeatEmptyFilePolicyDefaults,
   applyLoggingDefaults,
   applyMessageDefaults,
   applyModelDefaults,
@@ -610,10 +611,13 @@ export function createConfigIO(overrides: ConfigIoDeps = {}) {
       warnIfConfigFromFuture(validated.config, deps.logger);
       const cfg = applyModelDefaults(
         applyCompactionDefaults(
-          applyContextPruningDefaults(
-            applyAgentDefaults(
-              applySessionDefaults(applyLoggingDefaults(applyMessageDefaults(validated.config))),
+          applyHeartbeatEmptyFilePolicyDefaults(
+            applyContextPruningDefaults(
+              applyAgentDefaults(
+                applySessionDefaults(applyLoggingDefaults(applyMessageDefaults(validated.config))),
+              ),
             ),
+            { configFileExists: true },
           ),
         ),
       );
@@ -663,8 +667,11 @@ export function createConfigIO(overrides: ConfigIoDeps = {}) {
       const config = applyTalkApiKey(
         applyModelDefaults(
           applyCompactionDefaults(
-            applyContextPruningDefaults(
-              applyAgentDefaults(applySessionDefaults(applyMessageDefaults({}))),
+            applyHeartbeatEmptyFilePolicyDefaults(
+              applyContextPruningDefaults(
+                applyAgentDefaults(applySessionDefaults(applyMessageDefaults({}))),
+              ),
+              { configFileExists: false },
             ),
           ),
         ),
@@ -796,10 +803,13 @@ export function createConfigIO(overrides: ConfigIoDeps = {}) {
           config: normalizeConfigPaths(
             applyTalkApiKey(
               applyModelDefaults(
-                applyAgentDefaults(
-                  applySessionDefaults(
-                    applyLoggingDefaults(applyMessageDefaults(validated.config)),
+                applyHeartbeatEmptyFilePolicyDefaults(
+                  applyAgentDefaults(
+                    applySessionDefaults(
+                      applyLoggingDefaults(applyMessageDefaults(validated.config)),
+                    ),
                   ),
+                  { configFileExists: true },
                 ),
               ),
             ),

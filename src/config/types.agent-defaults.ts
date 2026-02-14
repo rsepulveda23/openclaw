@@ -191,6 +191,12 @@ export type AgentDefaultsConfig = {
     /** Max chars allowed after HEARTBEAT_OK before delivery (default: 30). */
     ackMaxChars?: number;
     /**
+     * Behavior when HEARTBEAT.md exists but has no actionable content (comments/headers only).
+     * - "skip": skip this heartbeat run
+     * - "run": continue heartbeat run (default for fresh installs)
+     */
+    emptyFilePolicy?: "skip" | "run";
+    /**
      * When enabled, deliver the model's reasoning payload for heartbeat runs (when available)
      * as a separate message prefixed with `Reasoning:` (same as `/reasoning on`).
      *

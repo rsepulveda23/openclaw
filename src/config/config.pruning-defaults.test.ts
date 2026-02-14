@@ -115,4 +115,38 @@ describe("config pruning defaults", () => {
       expect(cfg.agents?.defaults?.contextPruning?.mode).toBe("off");
     });
   });
+
+  it("defaults emptyFilePolicy to skip for existing config files", async () => {
+    await withTempHome(async (home) => {
+      const configDir = path.join(home, ".openclaw");
+      await fs.mkdir(configDir, { recursive: true });
+      await fs.writeFile(
+        path.join(configDir, "openclaw.json"),
+        JSON.stringify({ agents: { defaults: { heartbeat: { every: "30m" } } } }, null, 2),
+        "utf-8",
+      );
+
+      const cfg = loadConfig();
+      expect(cfg.agents?.defaults?.heartbeat?.emptyFilePolicy).toBe("skip");
+    });
+  });
+
+  it("keeps explicit emptyFilePolicy when configured", async () => {
+    await withTempHome(async (home) => {
+      const configDir = path.join(home, ".openclaw");
+      await fs.mkdir(configDir, { recursive: true });
+      await fs.writeFile(
+        path.join(configDir, "openclaw.json"),
+        JSON.stringify(
+          { agents: { defaults: { heartbeat: { every: "30m", emptyFilePolicy: "run" } } } },
+          null,
+          2,
+        ),
+        "utf-8",
+      );
+
+      const cfg = loadConfig();
+      expect(cfg.agents?.defaults?.heartbeat?.emptyFilePolicy).toBe("run");
+    });
+  });
 });

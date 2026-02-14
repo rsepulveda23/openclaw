@@ -189,8 +189,8 @@ export async function ensureAgentWorkspace(params?: {
   const identityPath = path.join(dir, DEFAULT_IDENTITY_FILENAME);
   const userPath = path.join(dir, DEFAULT_USER_FILENAME);
   // HEARTBEAT.md is intentionally NOT created from template.
-  // Per docs: "If the file is missing, the heartbeat still runs and the model decides what to do."
-  // Creating it from template (which is effectively empty) would cause heartbeat to be skipped.
+  // It's optional workspace guidance, and heartbeat behavior is controlled by config
+  // (`agents.defaults.heartbeat.every`) rather than file presence/content.
   const bootstrapPath = path.join(dir, DEFAULT_BOOTSTRAP_FILENAME);
 
   const isBrandNewWorkspace = await (async () => {

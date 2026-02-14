@@ -1,3 +1,4 @@
+import type { AgentDefaultsConfig } from "./types.agent-defaults.js";
 import type { OpenClawConfig } from "./types.js";
 import type { ModelDefinitionConfig } from "./types.models.js";
 import { DEFAULT_CONTEXT_TOKENS } from "../agents/defaults.js";
@@ -430,6 +431,46 @@ export function applyContextPruningDefaults(cfg: OpenClawConfig): OpenClawConfig
   if (!mutated) {
     return cfg;
   }
+
+  return {
+    ...cfg,
+    agents: {
+      ...cfg.agents,
+      defaults: nextDefaults,
+    },
+  };
+}
+
+export type HeartbeatEmptyFilePolicyDefaultsOptions = {
+  configFileExists: boolean;
+};
+
+export function applyHeartbeatEmptyFilePolicyDefaults(
+  cfg: OpenClawConfig,
+  options: HeartbeatEmptyFilePolicyDefaultsOptions,
+): OpenClawConfig {
+  const defaults = cfg.agents?.defaults;
+  if (!defaults) {
+    return cfg;
+  }
+
+  const defaultHeartbeat = defaults.heartbeat;
+  const hasDefaultPolicy = typeof defaultHeartbeat?.emptyFilePolicy === "string";
+  if (hasDefaultPolicy) {
+    return cfg;
+  }
+
+  // Backward compatibility: preserve legacy skip behavior for existing config files.
+  // Fresh installs (no config file yet) default to "run".
+  const fallbackPolicy: NonNullable<AgentDefaultsConfig["heartbeat"]>["emptyFilePolicy"] =
+    options.configFileExists ? "skip" : "run";
+  const nextDefaults = {
+    ...defaults,
+    heartbeat: {
+      ...defaultHeartbeat,
+      emptyFilePolicy: fallbackPolicy,
+    },
+  };
 
   return {
     ...cfg,

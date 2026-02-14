@@ -89,7 +89,7 @@ Common signatures:
 
 - `heartbeat skipped` with `reason=quiet-hours` → outside `activeHours`.
 - `requests-in-flight` → main lane busy; heartbeat deferred.
-- `empty-heartbeat-file` → `HEARTBEAT.md` exists but has no actionable content.
+- `empty-heartbeat-file` → `HEARTBEAT.md` is comments-only and `heartbeat.emptyFilePolicy` is `skip`.
 - `alerts-disabled` → visibility settings suppress outbound heartbeat messages.
 
 ## Timezone and activeHours gotchas
