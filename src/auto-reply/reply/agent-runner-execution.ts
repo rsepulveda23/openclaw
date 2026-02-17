@@ -13,6 +13,7 @@ import {
   sanitizeUserFacingText,
 } from "../../agents/pi-embedded-helpers.js";
 import { runEmbeddedPiAgent } from "../../agents/pi-embedded.js";
+import { CommandLane } from "../../process/lanes.js";
 import {
   resolveAgentIdFromSessionKey,
   resolveGroupSessionKey,
@@ -271,6 +272,11 @@ export async function runAgentTurnWithFallback(params: {
           const senderContext = buildTemplateSenderContext(params.sessionCtx);
           return runEmbeddedPiAgent({
             ...embeddedContext,
+            lane:
+              params.isHeartbeat &&
+              params.followupRun.run.config?.messages?.queue?.priorityPreemption
+                ? CommandLane.Heartbeat
+                : undefined,
             groupId: resolveGroupSessionKey(params.sessionCtx)?.id,
             groupChannel:
               params.sessionCtx.GroupChannel?.trim() ?? params.sessionCtx.GroupSubject?.trim(),

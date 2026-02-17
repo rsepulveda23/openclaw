@@ -370,6 +370,7 @@ export const QueueSchema = z
     debounceMsByChannel: DebounceMsBySurfaceSchema,
     cap: z.number().int().positive().optional(),
     drop: QueueDropSchema.optional(),
+    priorityPreemption: z.boolean().optional(),
   })
   .strict()
   .optional();

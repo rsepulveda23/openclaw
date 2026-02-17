@@ -500,7 +500,11 @@ export async function runHeartbeatOnce(opts: {
     return { status: "skipped", reason: "quiet-hours" };
   }
 
-  const queueSize = (opts.deps?.getQueueSize ?? getQueueSize)(CommandLane.Main);
+  // When priorityPreemption is enabled, heartbeats run on their own lane —
+  // check the Heartbeat lane instead of Main.
+  const priorityPreemptionEnabled = cfg.messages?.queue?.priorityPreemption === true;
+  const laneToCheck = priorityPreemptionEnabled ? CommandLane.Heartbeat : CommandLane.Main;
+  const queueSize = (opts.deps?.getQueueSize ?? getQueueSize)(laneToCheck);
   if (queueSize > 0) {
     return { status: "skipped", reason: "requests-in-flight" };
   }
