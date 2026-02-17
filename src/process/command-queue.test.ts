@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const diagnosticMocks = vi.hoisted(() => ({
   logLaneEnqueue: vi.fn(),
@@ -422,9 +422,9 @@ describe("command queue", () => {
         return "first";
       });
 
-      // Queue up more tasks behind the blocker.
-      const _t2Promise = enqueueCommandInLane("clear-test-lane", async () => "second");
-      const _t3Promise = enqueueCommandInLane("clear-test-lane", async () => "third");
+      // Queue up more tasks behind the blocker (catch rejections from clearCommandLane).
+      const _t2Promise = enqueueCommandInLane("clear-test-lane", async () => "second").catch(() => {});
+      const _t3Promise = enqueueCommandInLane("clear-test-lane", async () => "third").catch(() => {});
 
       // Lane should show 3 total (1 active + 2 queued).
       expect(getQueueSize("clear-test-lane")).toBe(3);
